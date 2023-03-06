@@ -2,6 +2,8 @@ use crate::board::*;
 use std::io;
 
 mod board;
+mod interface;
+mod pbrain;
 
 // remember to name the output file pbrain-<name>.exe
 fn main() {

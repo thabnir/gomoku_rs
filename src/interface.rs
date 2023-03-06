@@ -3,6 +3,10 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+// this is mostly ai-generated code, so it's really bad and mostly wrong
+// maybe just call the c++ code directly? idk how to port it to rust
+// i also don't know how to call the c++ code from rust, though
+
 trait GomokuInterface {
     fn brain_about(&self) -> String;
     fn brain_eval(&self, x: i32, y: i32);
