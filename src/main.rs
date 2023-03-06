@@ -3,6 +3,7 @@ use std::io;
 
 mod board;
 
+// remember to name the output file pbrain-<name>.exe
 fn main() {
     let mut game = Game::new();
     println!("{}", game.board);
