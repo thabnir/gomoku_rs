@@ -1,13 +1,11 @@
-use crate::board::*;
+use crate::game_core::*;
 use std::io;
 
-mod board;
-mod interface;
-mod pbrain;
+mod game_core;
 
 // remember to name the output file pbrain-<name>.exe
 fn main() {
-    let mut game = Game::new();
+    let mut game = GoGame::new();
     println!("{}", game.board);
     loop {
         println!("Enter x-y coordinates (1-{})\nx y", BOARD_SIZE);

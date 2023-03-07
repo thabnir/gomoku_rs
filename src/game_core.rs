@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use minimax::Strategy;
+
 pub const BOARD_SIZE: usize = 20;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -21,6 +23,9 @@ impl Stone {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Board {
     stones: [Option<Stone>; BOARD_SIZE * BOARD_SIZE],
+    white_board: [bool; BOARD_SIZE * BOARD_SIZE],
+    black_board: [bool; BOARD_SIZE * BOARD_SIZE],
+    current_player: Stone,
 }
 
 use std::fmt;
@@ -59,6 +64,9 @@ impl Board {
     pub fn new() -> Board {
         Board {
             stones: [None; BOARD_SIZE * BOARD_SIZE],
+            white_board: [false; BOARD_SIZE * BOARD_SIZE],
+            black_board: [false; BOARD_SIZE * BOARD_SIZE],
+            current_player: Stone::Black,
         }
     }
 
@@ -70,14 +78,24 @@ impl Board {
         x < BOARD_SIZE && y < BOARD_SIZE && self.get(x, y).is_none()
     }
 
-    fn set(&mut self, x: usize, y: usize, stone: Stone) {
-        if self.stones[y * BOARD_SIZE + x].is_some() {
+    fn set(&mut self, x: usize, y: usize, stone: Option<Stone>) {
+        let index = y * BOARD_SIZE + x;
+        if self.stones[index].is_some() {
             panic!("Stone already exists at ({}, {})", x, y); // TODO: remove when done
         }
-        self.stones[y * BOARD_SIZE + x] = Some(stone);
+        self.stones[index] = stone;
+        match stone {
+            Some(Stone::Black) => self.black_board[index] = true,
+            Some(Stone::White) => self.white_board[index] = true,
+            None => {
+                // To remove a stone
+                self.black_board[index] = false;
+                self.white_board[index] = false;
+            }
+        }
     }
 
-    pub fn make_move(&self, x: usize, y: usize, stone: Stone) -> Board {
+    pub fn make_move(&self, x: usize, y: usize, stone: Option<Stone>) -> Board {
         let mut new_board = self.clone();
         new_board.set(x, y, stone);
         new_board
@@ -85,39 +103,59 @@ impl Board {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Move {
-    x: usize,
-    y: usize,
-    stone: Stone,
+pub struct GoMove {
+    pub x: usize,
+    pub y: usize,
+    pub stone: Stone,
 }
 
-impl Move {
-    pub fn x(&self) -> usize {
-        self.x
+impl minimax::Move for GoMove {
+    fn apply(&self, board: &mut Board) {
+        board.make_move(self.x, self.y, Some(self.stone));
     }
 
-    pub fn y(&self) -> usize {
-        self.y
-    }
+    type G = GoGame;
 
-    pub fn stone(&self) -> Stone {
-        self.stone
-    }
-
-    pub fn new(x: usize, y: usize, stone: Stone) -> Move {
-        Move { x, y, stone }
+    fn undo(&self, state: &mut <Self::G as minimax::Game>::S) {
+        state.make_move(self.x, self.y, None);
     }
 }
 
-pub struct Game {
+impl GoMove {
+    pub fn new(x: usize, y: usize, stone: Stone) -> GoMove {
+        GoMove { x, y, stone }
+    }
+}
+
+pub struct GoGame {
     pub board: Board,
-    pub moves: Vec<Move>,
+    pub moves: Vec<GoMove>,
     pub current_turn: Stone,
 }
 
-impl Game {
-    pub fn new() -> Game {
-        Game {
+impl minimax::Game for GoGame {
+    type S = Board;
+
+    type M = GoMove;
+
+    fn generate_moves(state: &Self::S, moves: &mut Vec<Self::M>) {
+        for i in 0..BOARD_SIZE {
+            for j in 0..BOARD_SIZE {
+                if state.get(i, j).is_none() {
+                    moves.push(GoMove::new(i, j, state.current_player));
+                }
+            }
+        }
+    }
+
+    fn get_winner(state: &Self::S) -> Option<minimax::Winner> {
+        todo!() // TODO: implement a winner function (does either player have 5 in a row?)
+    }
+}
+
+impl GoGame {
+    pub fn new() -> GoGame {
+        GoGame {
             board: Board::new(),
             moves: Vec::new(),
             current_turn: Stone::Black,
@@ -129,8 +167,8 @@ impl Game {
     }
 
     pub fn make_move(&mut self, x: usize, y: usize) {
-        self.board = self.board.make_move(x, y, self.current_turn);
-        self.moves.push(Move::new(x, y, self.current_turn));
+        self.board = self.board.make_move(x, y, Some(self.current_turn));
+        self.moves.push(GoMove::new(x, y, self.current_turn));
         self.current_turn = self.current_turn.other();
     }
 }

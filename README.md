@@ -19,7 +19,7 @@
   - Probably, struggling to think of why not, and it means I only have to check which type of stone a sequence is once.
   - I could also have 3 board representations. Just adds a little bit of space complexity, which shouldn't be a problem.
 - Should I use bitmaps for && chaining of bits?
-  - Should probalby just worry about this later if it becomes a bottleneck. Better to finish it but have it be maybe slow than worry about this endlessly
+  - Should probably just worry about this later if it becomes a bottleneck. Better to finish it but have it be maybe slow than worry about this endlessly
 
 ### Gomocup
 
