@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use minimax::Strategy;
-
 pub const BOARD_SIZE: usize = 20;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -149,7 +147,22 @@ impl minimax::Game for GoGame {
     }
 
     fn get_winner(state: &Self::S) -> Option<minimax::Winner> {
-        todo!() // TODO: implement a winner function (does either player have 5 in a row?)
+        match state.current_player {
+            Stone::Black => {
+                if is_won(&state.black_board) {
+                    Some(minimax::Winner::PlayerJustMoved) // TODO: check if this is correct
+                } else {
+                    None
+                }
+            }
+            Stone::White => {
+                if is_won(&state.white_board) {
+                    Some(minimax::Winner::PlayerJustMoved) // TODO: check if this is correct
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 
@@ -171,4 +184,8 @@ impl GoGame {
         self.moves.push(GoMove::new(x, y, self.current_turn));
         self.current_turn = self.current_turn.other();
     }
+}
+
+fn is_won(board: &[bool; BOARD_SIZE * BOARD_SIZE]) -> bool {
+    todo!("Implement is_won function");
 }
